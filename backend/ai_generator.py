@@ -20,6 +20,7 @@ Tool Usage:
 - For specific topic or content questions: use **search_course_content**
 - When returning an outline, include the course title, course link, and every lesson with its number and title
 - Synthesize tool results into accurate, fact-based responses
+- **Only reference courses and lessons that appear in tool results** — never invent or suggest courses that were not returned by a tool
 - If a tool yields no results, state this clearly without offering alternatives
 
 Response Protocol:
