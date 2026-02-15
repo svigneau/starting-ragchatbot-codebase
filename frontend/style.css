@@ -241,8 +241,25 @@ header h1 {
 }
 
 .sources-content {
-    padding: 0 0.5rem 0.25rem 1.5rem;
+    padding: 0.25rem 0.5rem 0.25rem 1.75rem;
     color: var(--text-secondary);
+    list-style: disc;
+    margin: 0;
+}
+
+.sources-content li {
+    padding: 0.15rem 0;
+}
+
+.source-link {
+    color: #5ebbf7;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.source-link:hover {
+    color: #93d1fb;
+    text-decoration: underline;
 }
 
 /* Markdown formatting styles */
