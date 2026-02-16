@@ -15,14 +15,41 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
-    
+
+    initTheme();
     setupEventListeners();
     createNewSession();
     loadCourseStats();
 });
 
+// Theme toggle
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const theme = saved || 'dark';
+    document.body.setAttribute('data-theme', theme);
+    updateThemeAriaLabel(theme);
+}
+
+function toggleTheme() {
+    const current = document.body.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeAriaLabel(next);
+}
+
+function updateThemeAriaLabel(theme) {
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+}
+
 // Event Listeners
 function setupEventListeners() {
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
     // New chat button
     document.getElementById('newChatButton').addEventListener('click', createNewSession);
 
