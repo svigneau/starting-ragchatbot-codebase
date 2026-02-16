@@ -17,9 +17,11 @@ class TestRAGSystemQuery:
         config.MAX_RESULTS = max_results
         config.CHROMA_PATH = "/tmp/claude/test_chroma_db"
 
-        with patch("rag_system.VectorStore") as MockVS, \
-             patch("rag_system.AIGenerator") as MockAI, \
-             patch("rag_system.DocumentProcessor"):
+        with (
+            patch("rag_system.VectorStore") as MockVS,
+            patch("rag_system.AIGenerator") as MockAI,
+            patch("rag_system.DocumentProcessor"),
+        ):
             from rag_system import RAGSystem
 
             rag = RAGSystem(config)
@@ -115,9 +117,11 @@ class TestConfigMaxResults:
 
     def test_max_results_passed_to_vector_store(self):
         """VectorStore should receive the configured MAX_RESULTS"""
-        with patch("rag_system.VectorStore") as MockVS, \
-             patch("rag_system.AIGenerator"), \
-             patch("rag_system.DocumentProcessor"):
+        with (
+            patch("rag_system.VectorStore") as MockVS,
+            patch("rag_system.AIGenerator"),
+            patch("rag_system.DocumentProcessor"),
+        ):
             from config import Config
             from rag_system import RAGSystem
 
@@ -152,9 +156,11 @@ class TestVectorStoreSearch:
             collection.query(query_texts=["Python"], n_results=0)
 
         # ChromaDB raises an error for n_results <= 0
-        assert "Number of requested results" in str(exc_info.value) or \
-               "n_results" in str(exc_info.value).lower() or \
-               exc_info.value is not None
+        assert (
+            "Number of requested results" in str(exc_info.value)
+            or "n_results" in str(exc_info.value).lower()
+            or exc_info.value is not None
+        )
 
     def test_search_with_positive_max_results_succeeds(self):
         """Searching with n_results=5 should return results"""

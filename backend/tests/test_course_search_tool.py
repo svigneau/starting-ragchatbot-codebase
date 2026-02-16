@@ -80,9 +80,7 @@ class TestCourseSearchToolExecute:
             documents=[], metadata=[], distances=[]
         )
 
-        result = self.tool.execute(
-            query="topic", course_name="MCP", lesson_number=2
-        )
+        result = self.tool.execute(query="topic", course_name="MCP", lesson_number=2)
 
         assert "No relevant content found" in result
         assert "MCP" in result

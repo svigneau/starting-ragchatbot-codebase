@@ -1,6 +1,7 @@
 import anthropic
 from typing import List, Optional, Dict, Any
 
+
 class AIGenerator:
     """Handles interactions with Anthropic's Claude API for generating responses"""
 
@@ -37,22 +38,21 @@ All responses must be:
 4. **Example-supported** - Include relevant examples when they aid understanding
 Provide only the direct answer to what was asked.
 """
-    
+
     def __init__(self, api_key: str, model: str):
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
-        
+
         # Pre-build base API parameters
-        self.base_params = {
-            "model": self.model,
-            "temperature": 0,
-            "max_tokens": 800
-        }
-    
-    def generate_response(self, query: str,
-                         conversation_history: Optional[str] = None,
-                         tools: Optional[List] = None,
-                         tool_manager=None) -> str:
+        self.base_params = {"model": self.model, "temperature": 0, "max_tokens": 800}
+
+    def generate_response(
+        self,
+        query: str,
+        conversation_history: Optional[str] = None,
+        tools: Optional[List] = None,
+        tool_manager=None,
+    ) -> str:
         """
         Generate AI response with optional tool usage and conversation context.
         Supports up to MAX_TOOL_ROUNDS sequential tool calls.
@@ -81,7 +81,7 @@ Provide only the direct answer to what was asked.
             api_params = {
                 **self.base_params,
                 "messages": messages,
-                "system": system_content
+                "system": system_content,
             }
             if tools:
                 api_params["tools"] = tools
@@ -104,17 +104,21 @@ Provide only the direct answer to what was asked.
                         result = tool_manager.execute_tool(block.name, **block.input)
                     except Exception as e:
                         result = f"Tool execution error: {e}"
-                        tool_results.append({
+                        tool_results.append(
+                            {
+                                "type": "tool_result",
+                                "tool_use_id": block.id,
+                                "content": result,
+                            }
+                        )
+                        break
+                    tool_results.append(
+                        {
                             "type": "tool_result",
                             "tool_use_id": block.id,
-                            "content": result
-                        })
-                        break
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result
-                    })
+                            "content": result,
+                        }
+                    )
 
             messages.append({"role": "user", "content": tool_results})
 
@@ -122,7 +126,7 @@ Provide only the direct answer to what was asked.
         final_params = {
             **self.base_params,
             "messages": messages,
-            "system": system_content
+            "system": system_content,
         }
         final_response = self.client.messages.create(**final_params)
         return final_response.content[0].text

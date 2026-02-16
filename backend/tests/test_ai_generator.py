@@ -50,7 +50,13 @@ class TestAIGeneratorToolCalling:
         mock_response.content = [make_text_block("answer")]
         self.mock_client.messages.create.return_value = mock_response
 
-        tools = [{"name": "search_course_content", "description": "search", "input_schema": {}}]
+        tools = [
+            {
+                "name": "search_course_content",
+                "description": "search",
+                "input_schema": {},
+            }
+        ]
         self.generator.generate_response(query="question", tools=tools)
 
         call_kwargs = self.mock_client.messages.create.call_args[1]
@@ -80,7 +86,13 @@ class TestAIGeneratorToolCalling:
         mock_tool_manager = MagicMock()
         mock_tool_manager.execute_tool.return_value = "Found: Python basics content"
 
-        tools = [{"name": "search_course_content", "description": "search", "input_schema": {}}]
+        tools = [
+            {
+                "name": "search_course_content",
+                "description": "search",
+                "input_schema": {},
+            }
+        ]
 
         result = self.generator.generate_response(
             query="What is Python?",
@@ -182,9 +194,7 @@ class TestAIGeneratorToolCalling:
 
     def test_tool_error_result_propagated(self):
         """If the tool returns an error string, it should still be sent to Claude"""
-        tool_block = make_tool_use_block(
-            "search_course_content", {"query": "xyz"}
-        )
+        tool_block = make_tool_use_block("search_course_content", {"query": "xyz"})
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block]
@@ -196,7 +206,9 @@ class TestAIGeneratorToolCalling:
         self.mock_client.messages.create.side_effect = [first_response, final_response]
 
         mock_tool_manager = MagicMock()
-        mock_tool_manager.execute_tool.return_value = "Search error: n_results must be > 0"
+        mock_tool_manager.execute_tool.return_value = (
+            "Search error: n_results must be > 0"
+        )
 
         result = self.generator.generate_response(
             query="xyz",
@@ -210,22 +222,30 @@ class TestAIGeneratorToolCalling:
 
     def test_two_sequential_tool_calls(self):
         """Two tool calls in sequence: 3 API calls, 2 tool executions, correct final text"""
-        tool_block_1 = make_tool_use_block("get_course_outline", {"course_name": "AI"}, "id_1")
+        tool_block_1 = make_tool_use_block(
+            "get_course_outline", {"course_name": "AI"}, "id_1"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block_1]
 
-        tool_block_2 = make_tool_use_block("search_course_content", {"query": "transformers"}, "id_2")
+        tool_block_2 = make_tool_use_block(
+            "search_course_content", {"query": "transformers"}, "id_2"
+        )
         second_response = MagicMock()
         second_response.stop_reason = "tool_use"
         second_response.content = [tool_block_2]
 
         final_response = MagicMock()
         final_response.stop_reason = "end_turn"
-        final_response.content = [make_text_block("Transformers are covered in lesson 3.")]
+        final_response.content = [
+            make_text_block("Transformers are covered in lesson 3.")
+        ]
 
         self.mock_client.messages.create.side_effect = [
-            first_response, second_response, final_response
+            first_response,
+            second_response,
+            final_response,
         ]
 
         mock_tool_manager = MagicMock()
@@ -247,7 +267,9 @@ class TestAIGeneratorToolCalling:
 
     def test_second_round_includes_tools(self):
         """The second API call in the loop should still include tools"""
-        tool_block = make_tool_use_block("get_course_outline", {"course_name": "X"}, "id_1")
+        tool_block = make_tool_use_block(
+            "get_course_outline", {"course_name": "X"}, "id_1"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block]
@@ -272,12 +294,16 @@ class TestAIGeneratorToolCalling:
 
     def test_max_rounds_forces_response_without_tools(self):
         """After MAX_TOOL_ROUNDS tool calls, final call should have no tools"""
-        tool_block_1 = make_tool_use_block("get_course_outline", {"course_name": "A"}, "id_1")
+        tool_block_1 = make_tool_use_block(
+            "get_course_outline", {"course_name": "A"}, "id_1"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block_1]
 
-        tool_block_2 = make_tool_use_block("search_course_content", {"query": "B"}, "id_2")
+        tool_block_2 = make_tool_use_block(
+            "search_course_content", {"query": "B"}, "id_2"
+        )
         second_response = MagicMock()
         second_response.stop_reason = "tool_use"
         second_response.content = [tool_block_2]
@@ -287,7 +313,9 @@ class TestAIGeneratorToolCalling:
         final_response.content = [make_text_block("final answer")]
 
         self.mock_client.messages.create.side_effect = [
-            first_response, second_response, final_response
+            first_response,
+            second_response,
+            final_response,
         ]
 
         mock_tool_manager = MagicMock()
@@ -304,12 +332,16 @@ class TestAIGeneratorToolCalling:
 
     def test_second_tool_uses_first_results_context(self):
         """Final call messages should contain both tool rounds' context"""
-        tool_block_1 = make_tool_use_block("get_course_outline", {"course_name": "C"}, "id_1")
+        tool_block_1 = make_tool_use_block(
+            "get_course_outline", {"course_name": "C"}, "id_1"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block_1]
 
-        tool_block_2 = make_tool_use_block("search_course_content", {"query": "D"}, "id_2")
+        tool_block_2 = make_tool_use_block(
+            "search_course_content", {"query": "D"}, "id_2"
+        )
         second_response = MagicMock()
         second_response.stop_reason = "tool_use"
         second_response.content = [tool_block_2]
@@ -319,7 +351,9 @@ class TestAIGeneratorToolCalling:
         final_response.content = [make_text_block("answer")]
 
         self.mock_client.messages.create.side_effect = [
-            first_response, second_response, final_response
+            first_response,
+            second_response,
+            final_response,
         ]
 
         mock_tool_manager = MagicMock()
@@ -331,7 +365,9 @@ class TestAIGeneratorToolCalling:
         )
 
         # Final (third) API call messages should contain both rounds of context
-        final_call_msgs = self.mock_client.messages.create.call_args_list[2][1]["messages"]
+        final_call_msgs = self.mock_client.messages.create.call_args_list[2][1][
+            "messages"
+        ]
         # user query, assistant tool_use #1, user tool_result #1,
         # assistant tool_use #2, user tool_result #2
         assert len(final_call_msgs) == 5
@@ -345,7 +381,9 @@ class TestAIGeneratorToolCalling:
 
     def test_single_tool_round_still_works(self):
         """A single tool_use then end_turn: 2 API calls, 1 tool execution"""
-        tool_block = make_tool_use_block("search_course_content", {"query": "ML"}, "id_1")
+        tool_block = make_tool_use_block(
+            "search_course_content", {"query": "ML"}, "id_1"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block]
@@ -371,7 +409,9 @@ class TestAIGeneratorToolCalling:
 
     def test_tool_exception_handled_gracefully(self):
         """execute_tool raising an exception sends error as tool_result"""
-        tool_block = make_tool_use_block("search_course_content", {"query": "fail"}, "id_err")
+        tool_block = make_tool_use_block(
+            "search_course_content", {"query": "fail"}, "id_err"
+        )
         first_response = MagicMock()
         first_response.stop_reason = "tool_use"
         first_response.content = [tool_block]
@@ -392,7 +432,9 @@ class TestAIGeneratorToolCalling:
         )
 
         # Error should be sent as tool_result, then loop continues to next API call
-        second_call_msgs = self.mock_client.messages.create.call_args_list[1][1]["messages"]
+        second_call_msgs = self.mock_client.messages.create.call_args_list[1][1][
+            "messages"
+        ]
         tool_result = second_call_msgs[2]["content"][0]
         assert "Tool execution error" in tool_result["content"]
         assert "connection failed" in tool_result["content"]
